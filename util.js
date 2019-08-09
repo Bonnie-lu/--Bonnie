@@ -30,8 +30,7 @@ const splitFunc = (str, count) => {
   return arr;
 }
 
-
-// 指定的数组 和 个数 排列组合  （7选5 21种可能）
+// 排列组合指定的数组 和 个数 排列组合  （7选5 21种）
 const combine = function(n, k) {
   let allArr=[],res=[]
   function dfs(idx){
@@ -76,16 +75,24 @@ handleColorAndFace = hand => {
   }
 }
 
+const isStraight = type => {
+  return [12,11,10,6,5].includes(con.map[type])
+} 
+
 // 再比较牌面大小
 const compareFaceMax = (a, b) => {
-  for(let i = 0;i < a.number.length; i++){
-    if(b.number[i] > a.number[i]){
-      return 2;
-    }else if(b.number[i] < a.number[i]){
-      return 1;
+  if(isStraight(a.type) && isStraight(b.type)){
+     return b.number[0] > a.number[0] ? 2 : b.number[0] < a.number[0] ? 1 : 0
+  } else {
+    for(let i = 0;i < a.number.length; i++){
+      if(b.number[i] > a.number[i]){
+        return 2;
+      }else if(b.number[i] < a.number[i]){
+        return 1;
+      }
     }
+    return 0;
   }
-  return 0;
 }
 
 // 对比大小
@@ -107,8 +114,8 @@ const maxTypeCard = arr => {
   // 1.先找出当前的最大牌型  reduce 限定一个最小牌型为初始值
   const maxType = arr.reduce((a,b) => {
     const type = con.map
-    return type[a.type] <= type[b.type] ? b : a
-  }, {type: 'HighCard'}).type
+    return type[a.type] < type[b.type] ? b : a
+  }).type
   const maxTypeCards =  arr.filter(item => item.type === maxType)
 
   // 2.牌型相同下，筛选最大的5张牌
@@ -126,6 +133,11 @@ const maxTypeCard = arr => {
 const isDiffStraight = hand => {
   return hand.join(',') === '14,5,4,3,2' ? true : false
 }
+
+const isFourDiffStraight = hand => {
+  const str = hand.join(',')
+  return str === '14,5,4,3' || str === '14,5,4,2' || str === '14,4,3,2' ||  str === '14,5,3,2' ? true : false
+}
 module.exports = {
   splitFunc,
   combine,
@@ -133,5 +145,6 @@ module.exports = {
   compareFaceMax,
   compare,
   maxTypeCard,
-  isDiffStraight
+  isDiffStraight,
+  isFourDiffStraight
 }

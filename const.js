@@ -4,8 +4,8 @@ const colors = ['s', 'h', 'd', 'c']
 // 定义牌型
 const map = {
     RoyalFlush: 12,
-    BabyStraightFlush: 11,
-    StraightFlush: 10,
+    StraightFlush: 11,
+    BabyStraightFlush: 10,
     FourKind: 9,
     ThreeKindPair: 8,
     Flush: 7,

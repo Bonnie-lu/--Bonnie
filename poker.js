@@ -66,32 +66,39 @@ const handleFour = hand => {
   const { rounds, number, color } = u.handleColorAndFace(hand)
   let type, firstNumber = number[0];
   if(Array.from(new Set(color)).length === 1){
-   //  同花前提下的牌型
-   if(number[0]-number[3] === 3 || number[0]-number[3] === 4){
-      type = number[0] === 14 || number[0] === 13 ? 'RoyalFlush' : 'StraightFlush'
-      number[0]-number[3] === 3 ? number.unshift(firstNumber+1) : number.push(15)
+     //  同花前提下的牌型
+     if(u.isFourDiffStraight(number)){
+       type = 'BabyStraightFlush'
+     } else if(number[0]-number[3] === 3 || number[0]-number[3] === 4){
+      type = (number[0] === 14 && number[0]-number[3] === 3) ? 'RoyalFlush' : 'StraightFlush'
+      number[0]-number[3] === 3 && number[0] !== 14? number.unshift(firstNumber+1) : number.push(15)
     } else {
       type = 'Flush'
-      number.push(14);
+      number.unshift(15);
     }
-  } else{
-   //  同花前提下的牌型
+  } 
+  else{
+   //  非同花前提下的牌型
     switch(rounds){
       case '4':
         type = 'FourKind';
         number.push(15);
+        break;
+      case '3,1':
+        type = 'FourKind';
+        number.push(firstNumber);
         break;
       case '2,2':
         type = 'ThreeKindPair';
         number.unshift(firstNumber);
         break;
       case '2,1,1':
-        type = 'threeKind';
+        type = 'ThreeKind';
         number.unshift(firstNumber);
         break;
       case '1,1,1,1':
-        type = number[0]-number[4] === 3 ? 'Straight': 'OnePair';
-        number[0]-number[3] === 3 ? number.unshift(firstNumber+1) : number.unshift(firstNumber);
+        type = number[0]-number[3] === 3 || number[0]-number[3] === 4 ? 'Straight' : u.isFourDiffStraight(number) ? 'BabyStraight' : 'OnePair';
+        number[0]-number[3] === 3 && number[0] !== 14 ? number.unshift(firstNumber+1) :number[0]-number[3] === 4 ? number.push(15) : number.unshift(firstNumber);
         break;
     }
   }
@@ -131,39 +138,18 @@ const judgeHand = hand => {
 // Start
 
 const timeStart = new Date().getTime()
-// 测试7-----------------------------------------------
-// for (const game of json7.matches) {
-//   const alice = judgeHand(game.alice)
-//   const bob = judgeHand(game.bob)
-//   const result = u.compare(alice, bob)
-//   if (result !== game.result) {
-//     console.error('当前手牌：')
-//     console.log(alice, bob)
-//     console.error(game)
-//     console.error(`错误：结果为${result}，程序终止`)
-//     break
-//   }
-// }
-// 测试5 -----------------------------------------------
-// for (const game of json5.matches) {
-//   const alice = judgeHand(game.alice)
-//   const bob = judgeHand(game.bob)
-//   const result = u.compare(alice, bob)
-//   if (result !== game.result) {
-//     console.error('当前手牌：')
-//     console.error(game)
-//     console.error(`错误：结果为${result}，程序终止`)
-//     break
-//   }
-// }
-
-// 随机 测试4+1 || 6+1 || 5 || 7
-const json = json5.matches[5];
-const alice = judgeHand(json.alice)
-const bob = judgeHand(json.bob)
-const result = u.compare(alice, bob)
-console.log(json,alice,bob)
-console.log(result == 1 ? 'alice 赢了' : (result === 2 ? 'bob 赢了' : 'alice和bob打成平手'))
+for (const game of json4.matches) {
+  const alice = judgeHand(game.alice)
+  const bob = judgeHand(game.bob)
+  const result = u.compare(alice, bob)
+  if (result !== game.result) {
+    console.error('当前手牌：')
+    console.log(alice, bob)
+    console.error(game)
+    console.error(`错误：结果为${result}，程序终止`)
+    break
+  }
+}
 
 const timeEnd = new Date().getTime()
 console.log(`总共耗时：${timeEnd - timeStart}ms`)
