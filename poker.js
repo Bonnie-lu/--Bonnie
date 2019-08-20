@@ -5,10 +5,10 @@ const json4 = require('./json/five_cards_with_ghost.json')
 const json6 = require('./json/seven_cards_with_ghost.json')
 
 
-// 5张牌  返回（牌型，牌面，分数）
+// 5张牌
 const handleFive = hand => {
   // 拆分颜色和牌面
-  const {number, color, rounds} = u.handleColorAndFace(hand)
+  const {number, color, rounds} = u.handleColorAndFace(hand) //返回（牌型，牌面，分数）
   let type;
   if(Array.from(new Set(color)).length === 1){
    //  同花前提下的牌型
@@ -20,7 +20,7 @@ const handleFive = hand => {
      type = 'Flush'
    }
   } else{
-   //  同花前提下的牌型
+   //  非同花前提下的牌型
     switch(rounds){
       case '4,1':
           type = 'FourKind'
@@ -48,22 +48,23 @@ const handleFive = hand => {
   }
 } 
 
-// 7张牌  7选5选出最大的一副牌
+// 7张牌
 const handleSeven = hand => {
-
-  // 所有的排列组合 u.splitFunc指定2位的切割字符串
+  // 所有的排列组合 u.splitFunc指定2位的切割字符串 u.combine指7选5的排列组合21
   const allCards = u.combine(u.splitFunc(hand, 2), 5);
   const allFive = [];
 
   // 转成初始的字符串类型
   allCards.map(item=>{
-    allFive.push(handleFive(item.join('')))
+    const itemStr = item.join('')
+    allFive.push(itemStr.includes('Xn') ? handleFour(itemStr) : handleFive(itemStr))
   })
-  return u.maxTypeCard(allFive)
+
+  return u.maxTypeCard(allFive)  //21种中选出最大的一组牌
 }
-// 6选4的排列
+// 
 const handleFour = hand => {
-  const { rounds, number, color } = u.handleColorAndFace(hand)
+  const { rounds, number, color } = u.handleColorAndFace(hand)  // 返回（牌型，牌面，分数）
   let type, firstNumber = number[0];
   if(Array.from(new Set(color)).length === 1){
      //  同花前提下的牌型
@@ -108,37 +109,19 @@ const handleFour = hand => {
   }
 }
 
-
-// 6+1张牌
-const handleSix = hand => {
-  // 6选5 1.先剔除ghost  2.6选5 || 6选4
-  const noGhost  = u.splitFunc(hand, 2).filter(item => !item.includes('X'))
-  const selectFive = u.combine(u.splitFunc(noGhost.join(''), 2), 5);
-  const selectFour = u.combine(u.splitFunc(noGhost.join(''), 2), 4);
-  let allFive = [], allFour = []
-  selectFive.map(item => {
-    allFive.push(handleFive(item.join('')))
-  })
-  selectFour.map(item=>{
-    allFour.push(handleFour('Xn' + item.join('')))
-  })
-  allFive = allFive.concat(allFour)
-  return u.maxTypeCard(allFive)
-}
-
 // 判断牌 5 || 4+1 || 7 || 6+1
 const judgeHand = hand => {
   if(hand.length === 10){
    return hand.indexOf('X') !== -1 ? handleFour(hand) : handleFive(hand)
   }else {
-   return hand.indexOf('X') !== -1 ? handleSix(hand) : handleSeven(hand)
+   return handleSeven(hand)
   }
 }
 
-// Start
-
+// Start-------------------------------------------- 
 const timeStart = new Date().getTime()
-for (const game of json4.matches) {
+// 可将json7 改成json6,json5,json4 分别运行不同规则的牌
+for (const game of json7.matches) {
   const alice = judgeHand(game.alice)
   const bob = judgeHand(game.bob)
   const result = u.compare(alice, bob)
@@ -150,6 +133,5 @@ for (const game of json4.matches) {
     break
   }
 }
-
 const timeEnd = new Date().getTime()
 console.log(`总共耗时：${timeEnd - timeStart}ms`)
